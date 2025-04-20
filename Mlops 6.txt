@@ -1,0 +1,79 @@
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    confusion_matrix, ConfusionMatrixDisplay,
+    precision_recall_curve, PrecisionRecallDisplay,
+    accuracy_score
+)
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Load binary classification dataset
+data = load_breast_cancer()
+X, y = data.data, data.target
+
+# Standardize and split the data
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train model 1
+model1 = LogisticRegression(max_iter=200)
+model1.fit(X_train, y_train)
+y_pred1 = model1.predict(X_test)
+y_score1 = model1.predict_proba(X_test)[:, 1]
+
+# Train model 2 (with tuned hyperparameter)
+model2 = LogisticRegression(C=0.5, max_iter=300)
+model2.fit(X_train, y_train)
+y_pred2 = model2.predict(X_test)
+y_score2 = model2.predict_proba(X_test)[:, 1]
+
+# Accuracy scores
+acc1 = accuracy_score(y_test, y_pred1)
+acc2 = accuracy_score(y_test, y_pred2)
+
+print(f"Model 1 Accuracy: {acc1:.2f}")
+print(f"Model 2 Accuracy: {acc2:.2f}")
+
+# Plot and save Confusion Matrix for model 1
+cm1 = confusion_matrix(y_test, y_pred1)
+disp1 = ConfusionMatrixDisplay(confusion_matrix=cm1)
+disp1.plot()
+plt.title("Confusion Matrix - Model 1")
+plt.savefig("confusion_matrix_model1.png")
+plt.show()
+
+# Plot and save Confusion Matrix for model 2
+cm2 = confusion_matrix(y_test, y_pred2)
+disp2 = ConfusionMatrixDisplay(confusion_matrix=cm2)
+disp2.plot()
+plt.title("Confusion Matrix - Model 2")
+plt.savefig("confusion_matrix_model2.png")
+plt.show()
+
+# Precision-Recall Curve for model 1
+precision1, recall1, _ = precision_recall_curve(y_test, y_score1)
+pr_disp1 = PrecisionRecallDisplay(precision=precision1, recall=recall1)
+pr_disp1.plot()
+plt.title("Precision-Recall Curve - Model 1")
+plt.savefig("pr_curve_model1.png")
+plt.show()
+
+# Precision-Recall Curve for model 2
+precision2, recall2, _ = precision_recall_curve(y_test, y_score2)
+pr_disp2 = PrecisionRecallDisplay(precision=precision2, recall=recall2)
+pr_disp2.plot()
+plt.title("Precision-Recall Curve - Model 2")
+plt.savefig("pr_curve_model2.png")
+plt.show()
+
+# Print conclusion
+print("\n📌 Model Comparison:")
+if acc1 > acc2:
+    print("Model 1 is better.")
+elif acc2 > acc1:
+    print("Model 2 is better.")
+else:
+    print("Both models perform equally.")
