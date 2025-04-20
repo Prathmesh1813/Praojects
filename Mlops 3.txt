@@ -1,0 +1,32 @@
+# Import necessary libraries
+from sklearn.datasets import load_iris
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import joblib
+
+# Step 1: Load dataset and split
+iris = load_iris()
+X_train, X_test, y_train, y_test = train_test_split(
+    iris.data, iris.target, test_size=0.2, random_state=42
+)
+
+# Step 2: Train a Logistic Regression model
+model = LogisticRegression(max_iter=200)  # increased max_iter for convergence
+model.fit(X_train, y_train)
+
+# Evaluate the model
+accuracy = model.score(X_test, y_test)
+print(f"Model accuracy: {accuracy:.2f}")
+
+# Step 3: Save the model
+joblib.dump(model, 'logistic_regression_model.pkl')
+print("Model saved successfully!")
+
+# Step 4: Reuse the model (load and predict)
+loaded_model = joblib.load('logistic_regression_model.pkl')
+
+# Predict using the loaded model
+sample_input = [[6.1, 2.8, 4.7, 1.2]]  # Example input
+prediction = loaded_model.predict(sample_input)
+
+print(f"Predicted class: {iris.target_names[prediction][0]}")
