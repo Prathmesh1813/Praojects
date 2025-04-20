@@ -1,0 +1,54 @@
+# 📦 Import required libraries
+from sklearn.datasets import load_iris
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import joblib
+
+# ✅ Step 1: Data Preparation
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Standardize features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split into train and test
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
+
+# ✅ Step 2: Model Training (Version 1 - default hyperparameters)
+model_v1 = LogisticRegression(max_iter=200)
+model_v1.fit(X_train, y_train)
+acc_v1 = model_v1.score(X_test, y_test)
+print(f"Model_v1 Accuracy: {acc_v1:.2f}")
+
+# ✅ Step 3: Hyperparameter Tuning (Version 2)
+model_v2 = LogisticRegression(C=0.5, max_iter=300)
+model_v2.fit(X_train, y_train)
+acc_v2 = model_v2.score(X_test, y_test)
+print(f"Model_v2 (C=0.5) Accuracy: {acc_v2:.2f}")
+
+# ✅ Step 4: Record results
+results = {
+    "model_v1": acc_v1,
+    "model_v2 (C=0.5)": acc_v2
+}
+
+print("\n Comparison of Model Accuracies:")
+for model_name, acc in results.items():
+    print(f"{model_name}: Accuracy = {acc:.2f}")
+
+# ✅ Step 5: Model Versioning (Save each model)
+joblib.dump(model_v1, 'model_v1.pkl')
+joblib.dump(model_v2, 'model_v2_C_0.5.pkl')
+print("\n Models saved as 'model_v1.pkl' and 'model_v2_C_0.5.pkl'")
+
+# ✅ Step 6: Reuse a model (load and predict)
+loaded_model = joblib.load('model_v2_C_0.5.pkl')
+sample_input = [[6.1, 2.8, 4.7, 1.2]]
+scaled_input = scaler.transform(sample_input)
+prediction = loaded_model.predict(scaled_input)
+print(f"\n Sample Prediction from model_v2: {iris.target_names[prediction][0]}")
